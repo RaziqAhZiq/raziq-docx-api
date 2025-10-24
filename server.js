@@ -32,26 +32,20 @@ app.post("/extract", upload.any(), async (req, res) => {
 });
 
 // 📊 Excel header extractor
-app.post("/extract-excel-headers", upload.any(), (req, res) => {
+app.post("/extract-excel-headers", express.raw({ type: "*/*" }), (req, res) => {
   try {
-    const file = req.files?.[0];
-    if (!file) return res.status(400).json({ error: "No file uploaded" });
-
-    // Read workbook from uploaded file buffer
-    const workbook = XLSX.read(file.buffer, { type: "buffer" });
-    const sheetName = workbook.SheetNames[0]; // first sheet
+    const workbook = XLSX.read(req.body, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-
-    // Convert to 2D array, extract first row
     const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     const headers = data[0] || [];
-
     res.json({ headers });
   } catch (err) {
     console.error("Excel Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // 🚀 Start the server
 const port = process.env.PORT || 10000;
