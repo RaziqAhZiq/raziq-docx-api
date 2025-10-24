@@ -8,6 +8,10 @@ const upload = multer();
 
 app.use(cors());
 
+app.get("/", (_, res) => {
+  res.send("✅ raziq-docx-api is running.<br>Use POST /extract for DOCX or POST /extract-excel-headers for Excel.");
+});
+
 // Excel header extractor
 app.post("/extract-excel-headers", upload.single("file"), (req, res) => {
   try {
