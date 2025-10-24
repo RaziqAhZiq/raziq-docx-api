@@ -1,33 +1,38 @@
 import express from "express";
 import multer from "multer";
-import mammoth from "mammoth";
+import XLSX from "xlsx";
 import cors from "cors";
 
 const app = express();
 const upload = multer();
 
-app.use(cors()); // allow calls from your OutSystems app
+app.use(cors());
 
-// Health check endpoint
-app.get("/", (_, res) => {
-  res.send("✅ DOCX Extractor Running — POST /extract with form-data field 'file'");
-});
-
-// Main extraction endpoint
-app.post("/extract", upload.single("file"), async (req, res) => {
+// Excel header extractor
+app.post("/extract-excel-headers", upload.single("file"), (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded. Use field name 'file'." });
-    }
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    const result = await mammoth.extractRawText({ buffer: req.file.buffer });
-    res.json({ text: result.value.trim() });
+    // Read workbook from buffer
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0]; // first sheet
+    const worksheet = workbook.Sheets[sheetName];
+
+    // Convert to array of arrays
+    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    // Get first row (headers)
+    const headers = data[0] || [];
+
+    res.json({ headers });
   } catch (err) {
-    console.error("Extraction error:", err);
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Render assigns PORT automatically
+// Keep your old /extract DOCX route
+// ...
+
 const port = process.env.PORT || 10000;
-app.listen(port, () => console.log(`🚀 raziq-docx-api running on port ${port}`));
+app.listen(port, () => console.log(`Server running on port ${port}`));
