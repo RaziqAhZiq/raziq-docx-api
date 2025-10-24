@@ -93,8 +93,7 @@ app.post("/compare-excel", express.raw({ type: "*/*", limit: "20mb" }), (req, re
       ],
 
       Contract_Progression_Report: [
-        "effective date","employee id","employee name","cessation date","career code","remarks","attachment id","is current","branch name","department",
-        "category","position","section","supervisor id","salary grade","classification","leave group","key shift team"
+        "employee id","employee name","contract start date","contract end date","contract no","contract remarks","is current"
       ]
     };
 
