@@ -92,8 +92,13 @@ app.post("/compare-excel", express.raw({ type: "*/*", limit: "20mb" }), (req, re
         "category","position","section","supervisor id","salary grade","classification","leave group","key shift team"
       ],
 
-      Contract_Progression_Report: [
+      Contract_Progression_Excel: [
         "employee id","employee name","contract start date","contract end date","contract no","contract remarks","is current"
+      ],
+      
+      Leave_Excel: [
+        "employee id","employee name","department","category","leave group","hire date","cessation date","service years","leave type id","leave cycle period start date",
+        "leave cycle period end date","cost per day","full year entitled","full year adjust","full year bf earned","full year bf forfeit"
       ]
     };
 
