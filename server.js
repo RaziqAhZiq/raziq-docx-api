@@ -32,7 +32,7 @@ app.post("/extract", upload.any(), async (req, res) => {
 });
 
 // 📊 Excel header extractor
-app.post("/extract-excel-headers", express.raw({ type: "*/*" }), (req, res) => {
+app.post("/extract-excel-headers", express.raw({ type: "*/*", limit:"20mb"}), (req, res) => {
   try {
     const workbook = XLSX.read(req.body, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
