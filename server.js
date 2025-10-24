@@ -46,13 +46,15 @@ app.post("/extract-excel-headers", express.raw({ type: "*/*", limit: "20mb" }), 
   }
 });
 
-// 🧮 Excel file comparator (returns only the detected file name)
-app.post("/compare-excel", upload.single("file"), (req, res) => {
+// 🧮 Excel file comparator (binary body upload)
+app.post("/compare-excel", express.raw({ type: "*/*", limit: "20mb" }), (req, res) => {
   try {
-    if (!req.file) return res.status(400).send("No file uploaded");
+    if (!req.body || !req.body.length) {
+      return res.status(400).send("No file uploaded or invalid request body");
+    }
 
-    // Step 1: Read uploaded Excel file
-    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    // Step 1: Read uploaded Excel buffer
+    const workbook = XLSX.read(req.body, { type: "buffer" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
     const fileHeaders = (data[0] || []).map((h) => h?.toString().trim().toLowerCase());
@@ -108,8 +110,8 @@ app.post("/compare-excel", upload.single("file"), (req, res) => {
     // Step 4: Pick best match
     const bestMatch = Object.entries(scores).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
 
-    // Step 5: Return file name as text
-    res.send(bestMatch);
+    // Step 5: Return only file name as plain text
+    res.type("text/plain").send(bestMatch);
   } catch (err) {
     console.error("Compare Excel Error:", err);
     res.status(500).send("Error comparing Excel file: " + err.message);
